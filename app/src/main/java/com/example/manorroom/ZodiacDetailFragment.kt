@@ -15,7 +15,7 @@ import com.example.manorroom.api.ZodiacApi
 import com.example.manorroom.databinding.FragmentZodiacDetailBinding
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
-import retrofit2.converter.scalars.ScalarsConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.create
 
 
@@ -69,7 +69,7 @@ class ZodiacDetailFragment : Fragment() {
 
         val retrofit: Retrofit = Retrofit.Builder()
             .baseUrl("https://zodiac-api-test.onrender.com/")
-            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create())
             .build()
 
         val zodiacApi: ZodiacApi = retrofit.create<ZodiacApi>()
@@ -77,13 +77,15 @@ class ZodiacDetailFragment : Fragment() {
 
         binding.apply {
             if (zodiacName.text.toString() != zodiac.name) {
-                zodiacName.setText(zodiac.name)
+                zodiacName.text = zodiac.name
             }
             zodiacDescription.text = zodiac.description
             zodiacSymbol.text = zodiac.symbol
             zodiacMonth.text = zodiac.month
             viewLifecycleOwner.lifecycleScope.launch {
-                zodiacDaily.text = zodiacApi.fetchContents()
+                val contents = zodiacApi.fetchContents()
+                val zodiacItem = contents.find { it.sign == zodiac.name?.lowercase(Locale.getDefault()) }
+                zodiacDaily.text = zodiacItem?.title
             }
 
         }
